@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎬 Shorts Director Tool</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #e2e8f0;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #1e293b; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+        
+        /* Toast Animation */
+        @keyframes slideUp {
+            from { transform: translateY(100%); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .toast-enter { animation: slideUp 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <header class="bg-slate-900 border-b border-slate-700 sticky top-0 z-50 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-clapperboard text-orange-500 text-3xl"></i>
+                <div>
+                    <h1 class="text-xl font-bold text-white tracking-wide">DIRECTOR'S DESK</h1>
+                    <p class="text-xs text-slate-400">GTA6 Style Shorts Planner</p>
+                </div>
+            </div>
+            
+            <div class="bg-slate-800 px-5 py-2 rounded-full border border-slate-600 flex items-center gap-3 shadow-inner">
+                <span class="text-sm font-semibold text-slate-300">Total Duration:</span>
+                <span id="total-time-badge" class="text-xl font-bold transition-colors duration-300">0s</span>
+                <span class="text-xs text-slate-500">(Target: 20s - 35s)</span>
+            </div>
+
+            <button onclick="openSettingsModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-full border border-slate-600 transition-colors shadow-inner flex items-center gap-2 text-sm font-semibold ml-auto sm:ml-0 mt-2 sm:mt-0">
+                <i class="fa-solid fa-key text-yellow-500"></i> API Key
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-grow max-w-7xl mx-auto px-4 py-6 w-full grid grid-cols-1 lg:grid-cols-12 gap-6">
+        
+        <!-- LEFT PANEL: Character Reference -->
+        <aside class="lg:col-span-4 flex flex-col gap-4">
+            <div class="bg-slate-800 rounded-xl border border-slate-700 overflow-hidden shadow-xl">
+                <div class="relative">
+                    <img src="file_000000009c548207a52bfc201dcacbaa.png" alt="Character Reference" class="w-full h-48 object-cover object-top opacity-80 border-b border-slate-700" onerror="this.src='https://placehold.co/600x400/1e293b/e2e8f0?text=Character+Reference'">
+                    <div class="absolute bottom-2 left-2 bg-black/70 px-3 py-1 rounded-md border border-slate-600 backdrop-blur-sm">
+                        <span class="font-bold text-orange-400">iyonlabs</span>
+                    </div>
+                </div>
+                
+                <div class="p-4 space-y-4">
+                    <div>
+                        <h3 class="text-xs uppercase text-slate-400 font-bold mb-2">Personality</h3>
+                        <div class="flex flex-wrap gap-2">
+                            <span class="px-2 py-1 bg-slate-700 rounded text-xs">😄 Funny</span>
+                            <span class="px-2 py-1 bg-slate-700 rounded text-xs">⭐ Laid-back</span>
+                            <span class="px-2 py-1 bg-slate-700 rounded text-xs">🤍 Kind</span>
+                            <span class="px-2 py-1 bg-slate-700 rounded text-xs">⚡ Optimistic</span>
+                            <span class="px-2 py-1 bg-slate-700 rounded text-xs">💬 Sarcastic</span>
+                        </div>
+                        <blockquote class="mt-3 border-l-2 border-orange-500 pl-3 italic text-sm text-slate-300">
+                            "Life is too short to be serious all the time."<br>
+                            <span class="text-slate-400 text-xs">"Good vibes, are my superpower."</span>
+                        </blockquote>
+                    </div>
+
+                    <hr class="border-slate-700">
+
+                    <div>
+                        <h3 class="text-xs uppercase text-slate-400 font-bold mb-2">Master Prompt (Base)</h3>
+                        <p class="text-[11px] text-slate-400 bg-slate-900 p-2 rounded border border-slate-700 h-32 overflow-y-auto" id="base-prompt">
+                            A consistent 3D game character, male, 18, 182 cm, average build, red/orange messy hair, Itachi headband, white sleeveless "iyonlabs" shirt, red/yellow/black boxing shorts with "FIGHT", black flip-flops, silver dog-tag necklace, slightly dirty/rough look, casual and rebellious, silent character, only mumbles or uses gestures, no clear speaking, completely ignores camera, no eye contact, unaware of being recorded, GTA6-style semi-realistic 3D rendering, modern coastal city background, cinematic lighting, vertical 9:16.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- RIGHT PANEL: Shot Planner -->
+        <section class="lg:col-span-8 flex flex-col gap-4">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-slate-800 p-4 rounded-xl border border-slate-700 shadow-sm gap-4">
+                <div>
+                    <h2 class="text-lg font-bold text-white">Storyboard & Prompts</h2>
+                    <p class="text-xs text-slate-400">Passive/candid camera. 18yo character ignores the camera entirely.</p>
+                </div>
+                <div class="flex gap-2 w-full sm:w-auto">
+                    <button onclick="openAIModal()" class="flex-1 sm:flex-none bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors shadow-lg shadow-purple-900/50 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-wand-magic-sparkles"></i> Auto Story AI
+                    </button>
+                    <button onclick="addShot()" class="flex-1 sm:flex-none bg-orange-600 hover:bg-orange-500 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors shadow-lg shadow-orange-900/50 flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-plus"></i> Manual Shot
+                    </button>
+                </div>
+            </div>
+
+            <!-- Shots Container -->
+            <div id="shots-container" class="space-y-4 pb-20">
+                <!-- Shots will be injected here by JS -->
+            </div>
+        </section>
+    </main>
+
+    <!-- AI Story Modal -->
+    <div id="ai-modal" class="fixed inset-0 bg-black/80 z-[100] hidden items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-slate-800 border border-slate-600 rounded-xl shadow-2xl max-w-lg w-full overflow-hidden transform scale-95 opacity-0 transition-all duration-300" id="ai-modal-content">
+            <div class="p-5 border-b border-slate-700 flex justify-between items-center bg-slate-900/50">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-robot text-purple-400"></i> AI Story Generator
+                </h3>
+                <button onclick="closeAIModal()" class="text-slate-400 hover:text-white transition-colors">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <div class="p-5 space-y-4">
+                <p class="text-sm text-slate-300">Enter a short idea. AI will generate candid scenes with <b>Dual Voice-Over Narration (EN & ID)</b>.</p>
+                <textarea id="ai-prompt-input" rows="3" class="w-full bg-slate-900 border border-slate-600 rounded-lg p-3 text-sm text-slate-200 focus:outline-none focus:border-purple-500 placeholder-slate-500 shadow-inner resize-none" placeholder="e.g., Buying ice cream but bumping into someone..."></textarea>
+            </div>
+            <div class="p-5 border-t border-slate-700 bg-slate-900/50 flex justify-end gap-3">
+                <button onclick="closeAIModal()" class="px-4 py-2 rounded-lg text-sm font-semibold text-slate-300 hover:bg-slate-700 transition-colors">Cancel</button>
+                <button id="ai-generate-btn" onclick="generateAIStory()" class="bg-purple-600 hover:bg-purple-500 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors shadow-lg shadow-purple-900/50 flex items-center gap-2">
+                    <i class="fa-solid fa-bolt"></i> Generate Story
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="fixed inset-0 bg-black/80 z-[100] hidden items-center justify-center p-4 backdrop-blur-sm">
+        <div class="bg-slate-800 border border-slate-600 rounded-xl shadow-2xl max-w-lg w-full overflow-hidden transform scale-95 opacity-0 transition-all duration-300" id="settings-modal-content">
+            <div class="p-5 border-b border-slate-700 flex justify-between items-center bg-slate-900/50">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-key text-yellow-400"></i> API Key Configuration
+                </h3>
+                <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-white transition-colors">
+                    <i class="fa-solid fa-xmark text-xl"></i>
+                </button>
+            </div>
+            <div class="p-5 space-y-4">
+                <div class="bg-blue-900/30 border border-blue-800 rounded-lg p-3 text-sm text-blue-200">
+                    <i class="fa-solid fa-circle-info text-blue-400 mr-2"></i>
+                    Get your free Gemini API Key from 
+                    <a href="https://aistudio.google.com/app/apikey" target="_blank" class="text-blue-400 font-bold hover:underline">Google AI Studio</a>.
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Gemini API Key</label>
+                    <div class="relative">
+                        <input type="password" id="api-key-input-field" class="w-full bg-slate-900 border border-slate-600 rounded-lg py-2.5 pl-3 pr-10 text-sm text-slate-200 focus:outline-none focus:border-yellow-500 shadow-inner" placeholder="AIzaSy...">
+                        <button onclick="toggleApiKeyVisibility()" class="absolute inset-y-0 right-0 px-3 flex items-center text-slate-500 hover:text-slate-300">
+                            <i class="fa-solid fa-eye" id="api-key-eye-icon"></i>
+                        </button>
+                    </div>
+                    <p class="text-xs text-slate-500 mt-2">Stored securely in your browser's local storage. Never sent to our servers.</p>
+                </div>
+            </div>
+            <div class="p-5 border-t border-slate-700 bg-slate-900/50 flex justify-end gap-3">
+                <button onclick="closeSettingsModal()" class="px-4 py-2 rounded-lg text-sm font-semibold text-slate-300 hover:bg-slate-700 transition-colors">Cancel</button>
+                <button id="verify-btn" onclick="verifyAndSaveApiKey()" class="bg-yellow-600 hover:bg-yellow-500 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors shadow-lg shadow-yellow-900/50 flex items-center gap-2">
+                    <i class="fa-solid fa-check-circle"></i> Verify & Save
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
+
+    <script>
+        // --- DATA & STATE ---
+        const basePrompt = `A consistent 3D game character, male, 18, 182 cm, average build, red/orange messy hair, Itachi headband, white sleeveless "iyonlabs" shirt, red/yellow/black boxing shorts with "FIGHT", black flip-flops, silver dog-tag necklace, cigarette in mouth, slightly dirty/rough look, casual and rebellious, silent character, only mumbles or uses gestures, no clear speaking, completely ignores camera, no eye contact, unaware of being recorded, candid observer view, GTA6-style semi-realistic 3D rendering, modern coastal city background, cinematic lighting, vertical 9:16.`;
+        
+        const negativePrompt = `No cartoon, no anime, no chibi, no toy-like, no plastic skin, no exaggerated features, no costume change, no duplicate character, no malformed hands, character speaking, talking, clear dialogue, lip sync, audio dialogue, looking at camera, eye contact with camera, posing for camera, breaking fourth wall.`;
+
+        let userApiKey = localStorage.getItem('gemini_api_key') || "";
+
+        let shots = [
+            {
+                id: generateId(),
+                title: "Camera is placed on the ground, recording him intensely watching a line of ants on the sidewalk while shifting his weight in a looping GTA idle animation",
+                narration_en: "Some say this city moves too fast. But for him, even the smallest things are worth appreciating.",
+                narration_id: "Ada yang bilang kota ini bergerak terlalu cepat. Tapi bagi dia, hal terkecil pun patut diapresiasi.",
+                duration: 5,
+                image: null
+            },
+            {
+                id: generateId(),
+                title: "A friend records from behind as he arm-wrestles a street vendor, both displaying exaggerated GTA idle-like movements before starting, completely silent",
+                narration_en: "And of course, he could never turn down an absurd challenge from the locals.",
+                narration_id: "Dan tentu saja, dia tidak pernah bisa menolak tantangan absurd dari warga lokal.",
+                duration: 6,
+                image: null
+            }
+        ];
+
+        // --- CORE FUNCTIONS ---
+        function generateId() { return Math.random().toString(36).substr(2, 9); }
+
+        function calculateTotalTime() { return shots.reduce((total, shot) => total + Number(shot.duration || 0), 0); }
+
+        function updateTotalUI() {
+            const total = calculateTotalTime();
+            const badge = document.getElementById('total-time-badge');
+            badge.textContent = `${total}s`;
+
+            if (total < 20) badge.className = "text-xl font-bold transition-colors duration-300 text-yellow-400";
+            else if (total >= 20 && total <= 35) badge.className = "text-xl font-bold transition-colors duration-300 text-green-400";
+            else badge.className = "text-xl font-bold transition-colors duration-300 text-red-400";
+        }
+
+        function renderShots() {
+            const container = document.getElementById('shots-container');
+            container.innerHTML = '';
+
+            shots.forEach((shot, index) => {
+                // ADDED THE EXPLICIT ANIMATION RULE HERE
+                const combinedPrompt = `${basePrompt} SCENE ACTION: ${shot.title || 'Hanging out with NPCs'}. CAMERA MOVEMENT: Handheld smartphone camera, vlog style, POV or recorded by friends, amateur camera shake. ANIMATION STYLE: All characters (main and NPCs) display characteristic GTA-style idle animations, shifting weight, and looping idle states. NEGATIVE PROMPT: ${negativePrompt}`;
+
+                const shotEl = document.createElement('div');
+                shotEl.className = "bg-slate-800 rounded-xl border border-slate-700 p-4 shadow-md transition-all hover:border-slate-500 group/shot";
+                
+                shotEl.innerHTML = `
+                    <div class="flex flex-col sm:flex-row gap-5">
+                        
+                        <div class="w-full sm:w-32 flex-shrink-0 relative cursor-pointer border-2 border-dashed border-slate-600 rounded-xl overflow-hidden bg-slate-900 hover:border-orange-500 transition-colors aspect-[9/16] flex flex-col items-center justify-center group/img shadow-inner" onclick="document.getElementById('img-upload-${shot.id}').click()">
+                            ${shot.image 
+                                ? `<img src="${shot.image}" class="w-full h-full object-cover absolute inset-0 z-0">` 
+                                : `<i class="fa-solid fa-image text-3xl text-slate-600 mb-2 z-10 transition-transform group-hover/img:scale-110 group-hover/img:text-orange-400"></i><span class="text-[10px] text-slate-500 z-10 text-center px-2">Click to upload<br>storyboard</span>`
+                            }
+                            <div class="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover/img:opacity-100 transition-opacity z-20 backdrop-blur-sm">
+                                <i class="fa-solid fa-upload text-white text-2xl"></i>
+                            </div>
+                            <input type="file" id="img-upload-${shot.id}" class="hidden" accept="image/*" onchange="handleImageUpload(event, '${shot.id}')">
+                            <div class="absolute top-0 left-0 bg-orange-600 text-white text-[10px] font-bold px-2 py-1 rounded-br-lg z-20 shadow-md">
+                                Shot ${index + 1}
+                            </div>
+                        </div>
+
+                        <div class="flex-grow flex flex-col justify-center">
+                            
+                            <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center w-full mb-3">
+                                <div class="flex-grow w-full relative">
+                                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                        <i class="fa-solid fa-video text-slate-500 text-xs"></i>
+                                    </div>
+                                    <input type="text" value="${shot.title}" oninput="updateShot('${shot.id}', 'title', this.value)" class="w-full bg-slate-900 border border-slate-600 rounded-lg py-2.5 pl-8 pr-3 text-sm text-slate-200 focus:outline-none focus:border-orange-500 placeholder-slate-500 shadow-inner" placeholder="Visual action (e.g., He smiles sarcastically without looking at camera...)">
+                                </div>
+                                
+                                <div class="flex items-center gap-2 bg-slate-900 border border-slate-600 rounded-lg p-2 px-3 whitespace-nowrap shadow-inner">
+                                    <i class="fa-regular fa-clock text-slate-500"></i>
+                                    <input type="number" min="1" max="20" value="${shot.duration}" oninput="updateShot('${shot.id}', 'duration', this.value)" class="w-12 bg-transparent text-center text-sm text-slate-200 focus:outline-none font-bold text-orange-400">
+                                    <span class="text-xs text-slate-400">sec</span>
+                                </div>
+
+                                <button onclick="deleteShot('${shot.id}')" class="bg-slate-900 border border-slate-600 text-slate-500 hover:text-red-400 hover:border-red-500/50 hover:bg-red-950/30 p-2.5 rounded-lg transition-colors ml-auto sm:ml-0" title="Delete Shot">
+                                    <i class="fa-solid fa-trash-can text-lg px-1"></i>
+                                </button>
+                            </div>
+
+                            <!-- DUAL NARRATION PANEL -->
+                            <div class="w-full mb-3 flex flex-col gap-3 bg-slate-900/60 border border-slate-700/80 rounded-lg p-3 shadow-inner">
+                                <!-- EN VO -->
+                                <div class="flex items-start gap-3">
+                                    <div class="mt-0.5 w-6 flex-shrink-0 text-center">
+                                        <span class="text-[10px] font-bold bg-green-900 text-green-300 px-1.5 py-0.5 rounded border border-green-700">EN</span>
+                                    </div>
+                                    <textarea rows="2" 
+                                            oninput="updateShot('${shot.id}', 'narration_en', this.value)" 
+                                            class="w-full bg-transparent text-sm text-green-100/90 focus:outline-none placeholder-slate-600 resize-none font-medium italic border-b border-slate-700/50 pb-2" 
+                                            placeholder="Third-person Voice-Over (English)...">${shot.narration_en || ''}</textarea>
+                                </div>
+                                <!-- ID VO -->
+                                <div class="flex items-start gap-3">
+                                    <div class="mt-0.5 w-6 flex-shrink-0 text-center">
+                                        <span class="text-[10px] font-bold bg-blue-900 text-blue-300 px-1.5 py-0.5 rounded border border-blue-700">ID</span>
+                                    </div>
+                                    <textarea rows="2" 
+                                            oninput="updateShot('${shot.id}', 'narration_id', this.value)" 
+                                            class="w-full bg-transparent text-sm text-blue-100/90 focus:outline-none placeholder-slate-600 resize-none font-medium italic" 
+                                            placeholder="Third-person Voice-Over (Indonesian translation)...">${shot.narration_id || ''}</textarea>
+                                </div>
+                            </div>
+
+                            <div class="bg-slate-900/80 rounded-lg p-3 border border-slate-700/50 shadow-inner mt-auto">
+                                <div class="flex justify-between items-center mb-2">
+                                    <label class="text-[11px] text-orange-400 font-bold uppercase tracking-wider"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> AI Video Prompt</label>
+                                    <button onclick="copyPrompt('${shot.id}')" class="text-[11px] bg-slate-700 hover:bg-slate-600 text-white px-3 py-1.5 rounded transition-colors flex items-center gap-1.5 font-semibold border border-slate-500">
+                                        <i class="fa-regular fa-copy"></i> Copy Prompt
+                                    </button>
+                                </div>
+                                <p id="prompt-${shot.id}" class="text-[11px] text-slate-400 font-mono leading-relaxed line-clamp-2 hover:line-clamp-none cursor-pointer transition-all duration-300 bg-slate-950 p-2.5 rounded border border-slate-800" onclick="copyPrompt('${shot.id}')">
+                                    ${combinedPrompt}
+                                </p>
+                            </div>
+
+                        </div>
+                    </div>
+                `;
+                container.appendChild(shotEl);
+            });
+
+            updateTotalUI();
+        }
+
+        function handleImageUpload(event, id) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const shotIndex = shots.findIndex(s => s.id === id);
+                    if (shotIndex > -1) {
+                        shots[shotIndex].image = e.target.result;
+                        renderShots();
+                        showToast("Storyboard image updated", "success");
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function addShot() {
+            shots.push({
+                id: generateId(),
+                title: "",
+                narration_id: "",
+                narration_en: "",
+                duration: 5,
+                image: null
+            });
+            renderShots();
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }
+
+        function deleteShot(id) {
+            shots = shots.filter(shot => shot.id !== id);
+            renderShots();
+        }
+
+        function updateShot(id, field, value) {
+            const shotIndex = shots.findIndex(s => s.id === id);
+            if (shotIndex > -1) {
+                shots[shotIndex][field] = value;
+                
+                if (field === 'duration') {
+                    updateTotalUI();
+                }
+
+                if (field === 'title') {
+                    const updatedShot = shots[shotIndex];
+                    const combinedPrompt = `${basePrompt} SCENE ACTION: ${updatedShot.title || 'Hanging out with NPCs'}. CAMERA MOVEMENT: Handheld smartphone camera, vlog style, POV or recorded by friends, amateur camera shake. ANIMATION STYLE: All characters (main and NPCs) display characteristic GTA-style idle animations, shifting weight, and looping idle states. NEGATIVE PROMPT: ${negativePrompt}`;
+                    const promptEl = document.getElementById(`prompt-${id}`);
+                    if(promptEl) {
+                        promptEl.textContent = combinedPrompt;
+                    }
+                }
+            }
+        }
+
+        function copyPrompt(id) {
+            const promptText = document.getElementById(`prompt-${id}`).textContent.trim();
+            const tempTextArea = document.createElement("textarea");
+            tempTextArea.value = promptText;
+            document.body.appendChild(tempTextArea);
+            tempTextArea.select();
+            
+            try {
+                document.execCommand('copy');
+                showToast("Prompt copied to clipboard!", "success");
+            } catch (err) {
+                showToast("Failed to copy prompt.", "error");
+            }
+            document.body.removeChild(tempTextArea);
+        }
+
+        function showToast(message, type = "success") {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast-enter flex items-center gap-3 px-4 py-3 rounded-lg shadow-lg border text-sm font-semibold backdrop-blur-md`;
+            
+            if (type === "success") {
+                toast.classList.add("bg-green-900/80", "border-green-600", "text-green-100");
+                toast.innerHTML = `<i class="fa-solid fa-circle-check text-green-400 text-lg"></i> ${message}`;
+            } else if (type === "error") {
+                toast.classList.add("bg-red-900/80", "border-red-600", "text-red-100");
+                toast.innerHTML = `<i class="fa-solid fa-circle-xmark text-red-400 text-lg"></i> ${message}`;
+            } else {
+                toast.classList.add("bg-slate-800/80", "border-slate-600", "text-slate-100");
+                toast.innerHTML = `<i class="fa-solid fa-circle-info text-slate-400 text-lg"></i> ${message}`;
+            }
+
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateY(100%)';
+                toast.style.transition = 'all 0.3s ease-in';
+                setTimeout(() => { if (container.contains(toast)) container.removeChild(toast); }, 300);
+            }, 3000);
+        }
+
+        function openAIModal() { document.getElementById('ai-modal').classList.remove('hidden'); document.getElementById('ai-modal').classList.add('flex'); setTimeout(() => { document.getElementById('ai-modal-content').classList.remove('scale-95', 'opacity-0'); document.getElementById('ai-modal-content').classList.add('scale-100', 'opacity-100'); }, 10); }
+        function closeAIModal() { document.getElementById('ai-modal-content').classList.remove('scale-100', 'opacity-100'); document.getElementById('ai-modal-content').classList.add('scale-95', 'opacity-0'); setTimeout(() => { document.getElementById('ai-modal').classList.add('hidden'); document.getElementById('ai-modal').classList.remove('flex'); }, 300); }
+        function openSettingsModal() { document.getElementById('api-key-input-field').value = userApiKey; document.getElementById('settings-modal').classList.remove('hidden'); document.getElementById('settings-modal').classList.add('flex'); setTimeout(() => { document.getElementById('settings-modal-content').classList.remove('scale-95', 'opacity-0'); document.getElementById('settings-modal-content').classList.add('scale-100', 'opacity-100'); }, 10); }
+        function closeSettingsModal() { document.getElementById('settings-modal-content').classList.remove('scale-100', 'opacity-100'); document.getElementById('settings-modal-content').classList.add('scale-95', 'opacity-0'); setTimeout(() => { document.getElementById('settings-modal').classList.add('hidden'); document.getElementById('settings-modal').classList.remove('flex'); }, 300); }
+
+        function toggleApiKeyVisibility() {
+            const input = document.getElementById('api-key-input-field');
+            const icon = document.getElementById('api-key-eye-icon');
+            if (input.type === 'password') { input.type = 'text'; icon.classList.replace('fa-eye', 'fa-eye-slash'); } 
+            else { input.type = 'password'; icon.classList.replace('fa-eye-slash', 'fa-eye'); }
+        }
+
+        async function verifyAndSaveApiKey() {
+            const keyInput = document.getElementById('api-key-input-field').value.trim();
+            if (!keyInput) { showToast("API Key cannot be empty!", "warning"); return; }
+
+            const btn = document.getElementById('verify-btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Verifying...`;
+            btn.disabled = true;
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${keyInput}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ contents: [{ parts: [{ text: "Hi" }] }] })
+                });
+
+                if (response.ok) {
+                    userApiKey = keyInput;
+                    localStorage.setItem('gemini_api_key', keyInput);
+                    showToast("API Key Valid & Saved!", "success");
+                    closeSettingsModal();
+                } else throw new Error();
+            } catch (error) {
+                showToast("Verification Failed! Ensure your API Key is valid.", "error");
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // --- AI GENERATION FUNCTION ---
+        async function generateAIStory() {
+            if (!userApiKey) { showToast("Please enter your Gemini API Key!", "warning"); openSettingsModal(); return; }
+
+            const promptInput = document.getElementById('ai-prompt-input').value.trim();
+            if (!promptInput) { showToast("Enter a story idea!", "warning"); return; }
+
+            const btn = document.getElementById('ai-generate-btn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Crafting Story...`;
+            btn.disabled = true;
+
+            const payload = {
+                contents: [{
+                    parts: [{ 
+                        text: `Create a storyboard script for YouTube Shorts (total duration 20-35 seconds). 
+                        Main character: 18yo male (GTA6 style, laid-back, funny, sarcastic). 
+                        Story idea: "${promptInput}". 
+                        
+                        IMPORTANT RULES:
+                        1. The main character MUST always interact with NPCs. The camera is described as if recorded by a friend (NPC) or candidly. The character DOES NOT CARE and DOES NOT LOOK AT THE CAMERA.
+                        2. Never mention his name, always use pronouns like "he" or "him".
+                        3. Break the story into 4-6 sequential scenes connected into ONE coherent storyline.
+                        4. AUDIO RULE: The character "he" MUST NOT speak. Describe him ONLY MUMBLING, grunting, or using gestures.
+                        5. ANIMATION RULE: Describe actions where characters (both the main character and all NPCs) exhibit typical GTA-style idle animations (e.g., shifting weight, looping idle poses, looking around mindlessly like open-world NPCs).
+                        6. BILINGUAL VOICE-OVER: Generate the Narration from a THIRD-PERSON perspective. Write it primarily in English (narration_en), and provide the Indonesian translation (narration_id). The tone should be cool, slightly sarcastic, or funny.` 
+                    }]
+                }],
+                generationConfig: {
+                    responseMimeType: "application/json",
+                    responseSchema: {
+                        type: "ARRAY",
+                        items: {
+                            type: "OBJECT",
+                            properties: {
+                                "title": { "type": "STRING", "description": "Visual description of the candid scene in English." },
+                                "narration_en": { "type": "STRING", "description": "Third-person Voice-Over text (English)." },
+                                "narration_id": { "type": "STRING", "description": "Third-person Voice-Over text (Indonesian translation)." },
+                                "duration": { "type": "INTEGER", "description": "Shot duration (3-8 seconds)" }
+                            },
+                            "required": ["title", "narration_en", "narration_id", "duration"]
+                        }
+                    }
+                }
+            };
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${userApiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+                
+                if (result.candidates && result.candidates[0].content) {
+                    const jsonStr = result.candidates[0].content.parts[0].text;
+                    const aiShots = JSON.parse(jsonStr);
+                    
+                    shots = aiShots.map(s => ({
+                        id: generateId(),
+                        title: s.title,
+                        narration_en: s.narration_en,
+                        narration_id: s.narration_id,
+                        duration: s.duration,
+                        image: null
+                    }));
+                    
+                    renderShots();
+                    closeAIModal();
+                    showToast("Bilingual Story generated successfully!", "success");
+                    document.getElementById('ai-prompt-input').value = '';
+                } else throw new Error();
+            } catch (error) {
+                showToast("Failed to generate story. Check connection or API quota.", "error");
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        window.onload = renderShots;
+    </script>
+</body>
+</html>
